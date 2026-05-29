@@ -10,6 +10,8 @@ This repository contains the autonomous racing software developed for the **Robo
 *   **Finals**: **8th Place** overall.
     *   Best Lap: **16.21s**
     *   Total Time: **164.29s**
+ 
+Note: Race Videos are available on my [website](https://www.mannbhanushali.com/projects).
 
 ---
 
