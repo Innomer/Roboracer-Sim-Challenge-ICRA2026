@@ -1,9 +1,9 @@
 # RoboRacer Sim Racing League - ICRA 2026
-## Team Innomer
+## Team Innomer (Mann Bhanushali)
 
 This repository contains the autonomous racing software developed for the **RoboRacer Sim Racing League** at ICRA 2026. Our approach combined sampling-based trajectory optimization (Rollouts) with a rigorous, data-driven parameter tuning pipeline.
 
-### 🏆 Achievements
+### 🏆 Achievements ([Link](https://autodrive-ecosystem.github.io/competitions/roboracer-sim-racing-icra-2026/#results))
 *   **Qualifications**: **3rd Place** overall.
     *   Best Lap: **7.84s**
     *   Total Time: **79.34s**
@@ -15,7 +15,7 @@ This repository contains the autonomous racing software developed for the **Robo
 
 ## 🛠 Technical Approach: "Robust Rollout Racer"
 
-The core navigation logic is based on a **Sampling-based Model Predictive Control (MPC)** framework, where the vehicle evaluates multiple potential future trajectories (rollouts) and selects the one that minimizes a composite cost function.
+The core navigation logic is based on a Sampling-Based Trajectory Rollout Planner operating in a receding-horizon fashion. At every LiDAR update, the vehicle generates a set of candidate steering trajectories using a kinematic bicycle model, evaluates them using a multi-objective cost function, and selects the safest and most promising path for execution
 
 ### 1. System Architecture
 ```mermaid
@@ -63,13 +63,15 @@ graph TD
 *   **Disparity Extension** [Inspired by UNC Chapel Hill's Team's Approach](https://www.nathanotterness.com/2019/04/the-disparity-extender-algorithm-and.html): A crucial safety feature that identifies sudden "jumps" in LIDAR depth data (disparities). The system extends the nearer obstacle's distance across a calculated angular width (safety bubble) to prevent the vehicle from clipping corners or "cutting" too close to obstacles.
 *   **State Estimation**: Fusing Wheel Encoders and IMU data (Yaw Rate) to maintain accurate vehicle odometry and heading.
 
-### 3. Trajectory Rollouts & Scoring
-The racer generates a set of candidate steering angles and projects the vehicle's path forward using a **Kinematic Bicycle Model**. Each "rollout" is evaluated based on several weighted criteria:
+### 3. Trajectory Rollouts, Evaluations & Tracking
+The racer generates a set of candidate steering angles and projects the vehicle's path forward using a **Kinematic Bicycle Model**. Each rollout represents a feasible future vehicle path and is evaluated using a weighted scoring function:
 *   **Progress**: Maximizing forward distance along the track.
 *   **Clearance**: Maintaining safe distance from walls and obstacles (LIDAR-based).
 *   **Smoothness**: Penalizing high-frequency steering changes to maintain vehicle stability.
 *   **Gap Alignment**: Prioritizing paths that lead toward identified gaps in the LIDAR field.
 *   **Turn Commitment**: Biasing towards existing turning directions to prevent "steering chatter."
+
+The highest-scoring rollout is selected as the local plan and tracked using a Pure Pursuit controller to generate the final steering command.
 
 ### 3. Data-Driven Optimization (Qualifications)
 Our 3rd place qualification was driven by an automated **Hyperparameter Tuning Pipeline**.
@@ -79,7 +81,7 @@ Our 3rd place qualification was driven by an automated **Hyperparameter Tuning P
 
 ### 4. High-Performance C++ Implementation (Finals)
 For the final race, we ported the Python implementation to **C++** to reduce control latency and implemented several robustness enhancements:
-*   **Low Latency Control**: Real-time trajectory evaluation at high frequencies.
+*   **Low Latency Control**: Real-time rollout evaluation and path tracking at high frequencies.
 *   **Stuck Recovery**: Logic to detect when the car is wedged or blocked, triggering reverse-and-realign maneuvers.
 *   **Corner Turn Assist**: Specialized logic for handling sharp bends by dynamically adjusting lookahead distances and steering commitment.
 *   **Advanced Scoring**: Improved wall-clearance penalties and multi-stage throttle ramping.
